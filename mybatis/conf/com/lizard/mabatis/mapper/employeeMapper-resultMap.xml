@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 测试返回结果集映射 -->
+<mapper namespace="com.lizard.mybatis.mapper.EmpMapper">
+	<!-- 
+		id: 该resultMap的唯一标识
+		type: 自定义规则的java类型
+	 -->
+	<resultMap id="empMap" type="com.lizard.mybatis.model.Employee">
+		<!-- 主键列的映射关系 -->
+		<!-- column:数据库列名 property：对应的javaBean属性名 -->
+		<id column="employee_id" property="id" />
+		<result column="last_name" property="lastName" />
+		
+		<!-- 其它没有配置的列将按照实体类属性自动映射匹配 -->
+	</resultMap>
+	
+	<!-- 关联查询，使用级联属性的方式 -->
+	<resultMap id="empDeptMap1" type="com.lizard.mybatis.model.Employee">
+		<id column="employee_id" property="id" />
+		<result column="last_name" property="lastName" />
+		<result column="department_id" property="department.deptId" />
+		<result column="department_name" property="department.deptName" />
+	</resultMap>
+	
+	<!-- 关联查询，使用association指定联合对象的映射规则 -->
+	<resultMap id="empDeptMap2" type="com.lizard.mybatis.model.Employee">
+		<id column="employee_id" property="id" />
+		<result column="last_name" property="lastName" />
+		<!-- association：指定联合的javaBean对象 -->
+		<association property="department" javaType="com.lizard.mybatis.model.Department">
+			<id column="department_id" property="deptId"/>
+			<result column="department_name" property="deptName"/>
+		</association>
+	</resultMap>
+
+	<!-- 关联查询，使用association实现分步查询 -->
+	<resultMap id="empDeptMap3" type="com.lizard.mybatis.model.Employee">
+		<id column="employee_id" property="id" />
+		<result column="last_name" property="lastName" />
+		<!-- association：指定联合的javaBean对象 -->
+		<association property="department" column="department_id"
+			select="com.lizard.mybatis.mapper.DeptMapper.getDeptById" javaType="com.lizard.mybatis.model.Department">
+		</association>
+	</resultMap>
+
+	<select id="getOne" resultMap="empMap">
+		select * from employees where employee_id = #{id}
+	</select>
+	
+	<select id="getEmpAndDeptName" resultMap="empDeptMap2">
+		SELECT
+			e.employee_id,
+			e.email,
+			e.last_name,
+			e.hiredate,
+			d.department_id,
+			d.department_name 
+		FROM
+			emp e,
+			deprt d 
+		WHERE
+			e.department_id = d.department_id 
+			AND e.employee_id = #{id};
+	</select>
+	
+	<select id="getEmpAndDeptStep" resultMap="empDeptMap3">
+		SELECT
+			e.employee_id,
+			e.email,
+			e.last_name,
+			e.hiredate,
+			e.department_id 
+		FROM
+			emp e
+		WHERE
+			employee_id = #{id};
+	</select>
+	
+	<select id="getEmpsByDeptIdStep" resultType="com.lizard.mybatis.model.Employee">
+		SELECT
+			e.employee_id id,
+			e.email,
+			e.last_name lastName,
+			e.salary,
+			e.hiredate,
+			e.department_id 
+		FROM
+			emp e
+		WHERE
+			e.department_id = #{deptId};	
+	</select>
+	
+	<select id="getEmpsByDeptIdAndNameStep" resultType="com.lizard.mybatis.model.Employee">
+		SELECT
+			e.employee_id id,
+			e.email,
+			e.last_name lastName,
+			e.salary,
+			e.hiredate,
+			e.department_id 
+		FROM
+			emp e
+		WHERE
+			e.department_id = #{dId}
+			AND e.manager_id = #{mId};	
+	</select>
+
+</mapper>

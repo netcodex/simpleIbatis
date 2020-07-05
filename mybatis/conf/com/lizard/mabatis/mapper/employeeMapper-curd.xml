@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 测试增删改查 -->
+<mapper namespace="com.lizard.mybatis.mapper.EmpMapper">
+	<!-- 开启二级缓存 -->
+	<cache></cache>
+	<select id="getEmpById" resultType="com.lizard.mybatis.model.Employee">
+		select employee_id
+		'id',last_name 'lastName',email,salary,hiredate from emp where
+		employee_id = #{id}
+	</select>
+
+	<!-- 注意{}中参数名必须与实例对象的属性名相同，不然SQL映射时会抛ReflectException -->
+	<update id="saveOrUpdateEmp">
+		update emp set
+		salary=#{salary},email=#{email} where
+		employee_id=#{id}
+	</update>
+
+	<insert id="addEmp" keyProperty="id" useGeneratedKeys="true"
+		databaseId="mysql">
+		insert
+		into emp (last_name,email,salary) values
+		(#{lastName},#{email},#{salary})
+	</insert>
+
+	<!-- useGeneratedKeys使用自增主键策略，mybatis低层也是调用的jdbc原生API statement.getGeneratorKeys获取的主键 
+		keyProperty：指定对应的主键属性，即mybatis获取主键值后，将主键值绑定给javaBean的哪个属性 -->
+	<insert id="addEmp" keyProperty="id" useGeneratedKeys="true"
+		databaseId="orcl">
+		<!-- Oracle序列自增时配置主键 -->
+		<!-- resultMap必须指定返回值类型 -->
+		<selectKey keyProperty="id" order="BEFORE" resultType="int">
+			select
+			employees_seq.nextval from dual
+		</selectKey>
+		<!-- 注意这里insert语句要插入主键id字段，不然返回的主键值是BERORE插入之前的也即currntval，而不是nextval -->
+		insert into employees
+		(employee_id,last_name,email,salary,hire_date,job_id) values
+		(#{id},#{lastName},#{email},#{salary},#{hiredate},'AD_PRES')
+	</insert>
+
+	<delete id="removeEmp">
+		delete from emp where employee_id=#{id}
+	</delete>
+
+	<select id="getEmpByIdAndName" resultType="com.lizard.mybatis.model.Employee">
+		select employee_id
+		'id',last_name 'lastName',email,salary,hiredate from emp where
+		employee_id = ${id} and last_name = #{lastName}
+	</select>
+	
+	<select id="getEmpsByLastNameLike" resultType="com.lizard.mybatis.model.Employee">
+		select employee_id
+		'id',last_name 'lastName',email,salary,hiredate from emp where
+		last_name like #{lastName}
+	</select>
+	
+	<select id="getEmpMapById" resultType="map">
+		select employee_id
+		'id',last_name 'lastName',email,salary,hiredate from emp where
+		employee_id = #{id}
+	</select>
+	
+	<select id="getEmpPOJOMapByLastName" resultType="com.lizard.mybatis.model.Employee">
+		select employee_id
+		'id',last_name 'lastName',email,salary,hiredate from emp where
+		last_name like #{lastName}
+	</select>
+
+</mapper>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<!-- 配置数据库厂商标识结合多运行时环境，配置自生产主键返回策略 -->
+<configuration>
+	<properties resource="jdbc.properties"></properties>
+	
+	<settings>
+		<setting name="lazyLoadingEnabled" value="true"/>
+		<setting name="aggressiveLazyLoading" value="false"/>
+		<setting name="cacheEnabled" value="true"/>
+	</settings>
+
+	<environments default="dev">
+		<environment id="dev">
+			<transactionManager type="JDBC" />
+			<dataSource type="POOLED">
+				<property name="driver" value="${jdbc.mysql.driver}" />
+				<property name="url" value="${jdbc.mysql.url}" />
+				<property name="username" value="${jdbc.mysql.uname}" />
+				<property name="password" value="${jdbc.mysql.password}" />
+			</dataSource>
+		</environment>
+		<environment id="test">
+			<transactionManager type="JDBC" />
+			<dataSource type="POOLED">
+				<property name="driver" value="${jdbc.oracle.driver}" />
+				<property name="url" value="${jdbc.oracle.url}" />
+				<property name="username" value="${jdbc.oracle.uname}" />
+				<property name="password" value="${jdbc.oracle.password}" />
+			</dataSource>
+		</environment>
+	</environments>
+	<!-- databaseIdProvider 根据不同的数据库厂商执行不同的语句 ,DB_VENDOR是默认值，databaseIdProvider 
+		对应的 DB_VENDOR 实现会将 databaseId 设置为 DatabaseMetaData#getDatabaseProductName() 
+		返回的字符串 -->
+	<databaseIdProvider type="DB_VENDOR">
+		<!-- 给不同的数据库厂商设置别名，注意这里的一个坑，name名称是固定的，如mysql是MySQL，oracle是Oracle，不能写成小写，不然不起作用 -->
+		<property name="MySQL" value="mysql" />
+		<property name="Oracle" value="orcl" />
+	</databaseIdProvider>
+	
+	<mappers>
+		<mapper resource="com/lizard/mabatis/mapper/employeeMapper-curd.xml" />
+		<mapper resource="com/lizard/mabatis/mapper/employeeMapper-resultMap.xml" />
+		<mapper resource="com/lizard/mabatis/mapper/departmentMapper.xml" />
+		<mapper resource="com/lizard/mabatis/mapper/employeeMapper-dynamicsql.xml" />
+	</mappers>
+</configuration>

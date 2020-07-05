@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace命名空间，可以随意指定，不重复就行 -->
+<mapper namespace="com.lizard.mybatis.EmpMapper">
+	<!-- 注意，mysql是大小写敏感的，表名必须与数据库一致，
+	resultType用全类名
+	id 查询唯一限定名，使用时最好namespace.id -->
+	<select id="selectEmp" resultType="com.lizard.mybatis.model.Empolyee">
+		select * from employees where
+		employee_id = #{id}
+	</select>
+</mapper>

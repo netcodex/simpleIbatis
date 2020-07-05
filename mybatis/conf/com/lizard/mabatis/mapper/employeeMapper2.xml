@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 测试通过接口绑定映射文件 -->
+<!-- namespace定义为接口的全类名 -->
+<mapper namespace="com.lizard.mybatis.mapper.EmpMapper">
+	<!-- 这里id必须与接口方法名相同，不然接口绑定映射文件会失败 -->
+	<select id="getOne" resultType="com.lizard.mybatis.model.Empolyee">
+		select employee_id 'id',last_name 'lastName',email,salary,hiredate from employees where
+		employee_id = #{id}
+	</select>
+</mapper>

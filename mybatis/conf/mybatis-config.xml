@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<!-- 全局配置文件配置项说明演示 -->
+<configuration>
+	<!-- 1.properties 引入外部文件 -->
+	<properties resource="jdbc.properties"></properties>
+	
+	<!-- 2.setting 设置mybatis运行时参数 -->
+	<settings>
+		<setting name="mapUnderscoreToCamelCase" value="true" />
+	</settings>
+	
+	<!-- 3.typeAliases 设置别名 -->
+	<typeAliases>
+		<typeAlias type="com.lizard.mybatis.model.Empolyee" alias="emp" />
+		<!-- package包下的所有类会使用 Bean 的首字母小写的非限定类名来作为它的别名，使用@Alias("")注解可以单独定义 -->
+		<package name="com.lizard.mybatis" />
+	</typeAliases>
+	
+	<!-- 4.environments 运行时多环境配置 -->
+	<environments default="dev">
+	
+		<environment id="dev">
+		<!-- transactionManager事务管理器：JDBC（JDBC数据源获取的连接管理事务）|MANAGED （容器管理事务）-->
+		<!-- 如果使用的 Spring + MyBatis，则没有必要配置事务管理器，因为 Spring 模块会使用自带的管理器来覆盖前面的配置。 -->
+			<transactionManager type="JDBC"></transactionManager>
+			<dataSource type="POOLED"></dataSource>
+		</environment>
+		
+		<environment id="test">
+			<transactionManager type="JDBC"></transactionManager>
+			<!-- dataSource数据源：UNPOOLED|POOLED|JNDI，也可以通过实现org.apache.ibatis.datasource.DataSourceFactory接口来自定义数据源 -->
+			<dataSource type="com.lizard.mybatis.DruidDataSource"></dataSource>
+		</environment>
+		
+	</environments>
+</configuration>
+

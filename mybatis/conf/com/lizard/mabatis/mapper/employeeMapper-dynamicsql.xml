@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 测试动态SQL -->
+<mapper namespace="com.lizard.mybatis.mapper.EmpMapper">
+	<!-- 动态条件查询 -->
+	<select id="getEmpByCondition" resultType="com.lizard.mybatis.model.Employee">
+		<include refid="selectEmpCols">
+			<property name="jobId" value="RH"/>
+		</include>
+		<where>
+		<if test="id != null">
+			e.employee_id = #{id}
+		</if>
+		<if test="lastName != null and lastName != &quot;&quot;">
+			AND e.last_name like #{lastName};
+		</if>
+		<if test="department_id != null">
+			AND e.department_id = #{deptId}
+		</if>
+		</where>	
+	</select>
+	
+	<!-- 分支查询 -->
+	<select id="getEmpByConditionChoose" resultType="com.lizard.mybatis.model.Employee">
+		SELECT
+			e.employee_id id,
+			e.email,
+			e.last_name lastName,
+			e.salary,
+			e.hiredate,
+			e.department_id 
+		FROM
+			emp e
+		<where>
+			<choose>
+				<when test="id != null">
+					e.employee_id = #{id}
+				</when>
+				<when test="lastName != null and lastName != &quot;&quot;">
+					e.last_name like #{lastName}
+				</when>
+				<when test="department_id != null">
+					e.department_id = #{deptId}
+				</when>
+				<otherwise>
+					1 = 1
+				</otherwise>
+			</choose>
+		</where>	
+	</select>
+	
+	<!-- 动态条件更新 -->
+	<update id="updateEmp" >
+		UPDATE emp 
+		<set>
+			<if test="lastName!=null">
+				last_name = #{lastName},
+			</if>
+			<if test="email!=null">
+				last_name = #{lastName},
+			</if>
+			<if test="salary!=null">
+				salary = #{salary} 
+			</if>
+		</set>
+		WHERE
+			employee_id = #{id}		
+	</update>
+	
+	<!-- foreach遍历集合 -->
+	<select id="getEmpByConditionForEach" resultType="com.lizard.mybatis.model.Employee">
+		SELECT
+			e.employee_id id,
+			e.email,
+			e.last_name lastName,
+			e.salary,
+			e.hiredate,
+			e.department_id 
+		FROM
+			emp e 
+		WHERE
+			employee_id IN
+			<foreach collection="array" item="empId" open="(" close=")" index="" separator=",">
+				#{empId}
+			</foreach>	
+	</select>
+	
+	<!-- 使用foreach批量插入 -->
+	<insert id="batchInsert" databaseId="mysql">
+		<!-- mysql支持 insert into () values (),();语法 -->
+		INSERT INTO emp ( last_name, email, salary )
+		VALUES
+		<foreach collection="list" item="emp" separator="," close=";">
+			(#{emp.lastName},#{emp.email},#{emp.salary})
+		</foreach>
+	</insert>
+	
+	<insert id="batchInsert" databaseId="orcl">
+		<!-- oracle批量插入方式一：begin ... end;
+		<foreach collection="list" item="emp" open="begin" close="end;">
+			INSERT INTO employees ( last_name, email, salary, hire_date, job_id )
+			VALUES
+				(#{emp.lastName},#{emp.email},#{emp.salary},#{emp.hiredate},'SH_CLERK');
+		</foreach> 
+		-->
+		INSERT INTO employees ( last_name, email, salary, hire_date, job_id )
+		SELECT
+			lastName,
+			email,
+			salary,
+			hiredate,
+			'SH_CLERK' 
+		FROM
+		<foreach collection="list" item="emp" open="(" close=")" separator="union">
+			SELECT #{emp.lastName} lastName, #{emp.email} email, #{emp.salary} salary, #{emp.hiredate} hiredate FROM dual
+		</foreach>
+	</insert>
+	
+	<sql id="selectEmpCols">
+		SELECT
+			e.employee_id id,
+			e.email,
+			e.last_name lastName,
+			e.salary,
+			e.hiredate,
+			e.department_id 
+		FROM
+			emp e
+	</sql>
+	
+	<sql id="selectCols">
+		<if test="_databaseId == orcl">
+			employee_id,hire_date,email,${jobId}
+		</if>
+		<if test="_databaseId == mysql">
+			id,hiredate,email
+		</if>
+	</sql>
+
+</mapper>

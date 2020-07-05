@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lizard.mybatis.mapper.DeptMapper">
+
+	<select id="getDeptById" resultType="com.lizard.mybatis.model.Department">
+		SELECT
+			d.department_id deptId,
+			d.department_name deptName
+		FROM
+			deprt d
+		WHERE
+			department_id = #{id}
+	</select>
+
+	<resultMap type="com.lizard.mybatis.model.Department" id="empsMap">
+		<id column="department_id" property="deptId" />
+		<result column="department_name" property="deptName" />
+		<!-- ofType 指定集合中元素的类型 -->
+		<collection property="emps" ofType="com.lizard.mybatis.model.Employee" autoMapping="true">
+			<!-- 定义集合中元素的封装规则 -->
+			<id column="employee_id" property="id" />
+			<result column="last_name" property="lastName" />
+		</collection>
+	</resultMap>
+	
+	<select id="getEmpsByDeptId" resultMap="empsMap">
+		SELECT
+			d.department_id,
+			d.department_name,
+			e.employee_id,			
+			e.last_name,
+			e.email,
+			e.salary,
+			e.hiredate 
+		FROM
+			deprt d
+			LEFT JOIN emp e ON d.department_id = e.department_id 
+		WHERE
+			d.department_id = #{deptId}
+	</select>
+
+	<resultMap type="com.lizard.mybatis.model.Department" id="empsMapStep">
+		<id column="deptId" property="deptId" />
+		<result column="deptName" property="deptName" />
+		<!-- column:指定两表关联列（左表列），如果多个列关联，则可以写成{key1=val1,key2=val2...}（key为右表列，val为左表列）的形式，如{dId=deptId,dName=deptName} -->
+		<!-- fetchType： 指定结果集是否延迟加载，会覆盖全局配置lazyLoadingEnabled
+					"lazy"：延迟
+					"eager"：立即
+		 -->
+		<collection property="emps" ofType="com.lizard.mybatis.model.Employee"
+			select="com.lizard.mybatis.mapper.EmpMapper.getEmpsByDeptIdStep"
+			column="deptId" fetchType="lazy">
+		</collection>
+	</resultMap>
+	
+	<resultMap type="com.lizard.mybatis.model.Department" id="empsMapStepMultiCol">
+		<id column="deptId" property="deptId" />
+		<result column="deptName" property="deptName" />
+		<collection property="emps" ofType="com.lizard.mybatis.model.Employee"
+			select="com.lizard.mybatis.mapper.EmpMapper.getEmpsByDeptIdAndNameStep"
+			column="{dId=deptId,mId=managerId}" fetchType="lazy">
+		</collection>
+	</resultMap>
+	
+	<select id="getEmpsByDeptIdStep" resultMap="empsMapStep">
+		SELECT
+			d.department_id deptId,
+			d.department_name deptName,
+			d.manager_id managerId
+		FROM
+			deprt d
+		WHERE
+			department_id = #{id}
+	</select>
+	
+</mapper>
